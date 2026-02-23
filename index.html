@@ -2,44 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLOTJI-AI PRO</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 </head>
 <body>
-
-<div class="app-container">
-    <header class="main-header">
-        <div class="ai-status">
-            <span class="dot"></span>
-            <span>FLOTJI-AI PRO</span>
+    <div class="app-container">
+        <header>FLOTJI • NEURAL CORE</header>
+        <div id="chat-window"></div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Введите запрос..." autocomplete="off">
+            <button id="send-btn">SEND</button>
         </div>
-    </header>
-
-    <main id="chat-window"></main>
-
-    <div id="quick-actions" style="padding: 0 15px; display: flex; gap: 5px; overflow-x: auto;">
-        <button onclick="quickCmd('Время')" class="q-btn">⏰ Время</button>
-        <button onclick="quickCmd('Анекдот')" class="q-btn">😄 Юмор</button>
-        <button onclick="quickCmd('Очистить')" class="q-btn">🗑️ Стереть</button>
     </div>
-
-    <footer class="input-area">
-        <div class="input-wrapper">
-            <label for="file-upload" class="icon-btn">📷</label>
-            <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="analyzeImage(event)">
-            
-            <input type="text" id="user-input" placeholder="Спроси FLOTJI..." autocomplete="off">
-            
-            <button id="mic-btn" class="icon-btn">🎤</button>
-            <button id="send-btn" class="icon-btn" style="color:#1a73e8">➤</button>
-        </div>
-    </footer>
-</div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
