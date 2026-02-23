@@ -3,16 +3,16 @@ const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const status = document.getElementById('status');
 
-// Запуск ИИ
+// Р—Р°РїСѓСЃРє РР
 async function init() {
     try {
-        status.innerText = "СИСТЕМА ГРУЗИТСЯ...";
+        status.innerText = "РЎРРЎРўР•РњРђ Р“Р РЈР—РРўРЎРЇ...";
         model = await mobilenet.load();
-        status.innerText = "FLOTJI: В СЕТИ";
-        addMsg("Я готов к работе! Спроси меня о чем-нибудь или пришли фото.", "bot");
+        status.innerText = "FLOTJI: Р’ РЎР•РўР";
+        addMsg("РЇ РіРѕС‚РѕРІ Рє СЂР°Р±РѕС‚Рµ! РЎРїСЂРѕСЃРё РјРµРЅСЏ Рѕ С‡РµРј-РЅРёР±СѓРґСЊ РёР»Рё РїСЂРёС€Р»Рё С„РѕС‚Рѕ.", "bot");
     } catch (e) {
-        status.innerText = "ИИ В ОФФЛАЙНЕ";
-        addMsg("Привет! Я пока работаю в режиме простого чата.", "bot");
+        status.innerText = "РР Р’ РћР¤Р¤Р›РђР™РќР•";
+        addMsg("РџСЂРёРІРµС‚! РЇ РїРѕРєР° СЂР°Р±РѕС‚Р°СЋ РІ СЂРµР¶РёРјРµ РїСЂРѕСЃС‚РѕРіРѕ С‡Р°С‚Р°.", "bot");
     }
 }
 init();
@@ -32,14 +32,14 @@ function handleText() {
     input.value = "";
 
     setTimeout(() => {
-        let res = "Я тебя не совсем понял, но я учусь!";
+        let res = "РЇ С‚РµР±СЏ РЅРµ СЃРѕРІСЃРµРј РїРѕРЅСЏР», РЅРѕ СЏ СѓС‡СѓСЃСЊ!";
         const low = val.toLowerCase();
 
-        if (low.includes("привет")) res = "Привет! Я Флотжи, твой ИИ.";
-        else if (low.includes("как дела")) res = "У меня всё отлично, летаю по проводам интернета!";
-        else if (low.includes("покажи")) {
-            const q = low.replace("покажи", "").trim() || "neon";
-            res = "Вот что я нашел по запросу: " + q;
+        if (low.includes("РїСЂРёРІРµС‚")) res = "РџСЂРёРІРµС‚! РЇ Р¤Р»РѕС‚Р¶Рё, С‚РІРѕР№ РР.";
+        else if (low.includes("РєР°Рє РґРµР»Р°")) res = "РЈ РјРµРЅСЏ РІСЃС‘ РѕС‚Р»РёС‡РЅРѕ, Р»РµС‚Р°СЋ РїРѕ РїСЂРѕРІРѕРґР°Рј РёРЅС‚РµСЂРЅРµС‚Р°!";
+        else if (low.includes("РїРѕРєР°Р¶Рё")) {
+            const q = low.replace("РїРѕРєР°Р¶Рё", "").trim() || "neon";
+            res = "Р’РѕС‚ С‡С‚Рѕ СЏ РЅР°С€РµР» РїРѕ Р·Р°РїСЂРѕСЃСѓ: " + q;
             addMsg(`<img src="https://loremflickr.com/400/300/${q}?random=${Math.random()}">`, "bot", true);
         }
         addMsg(res, "bot");
@@ -53,11 +53,11 @@ async function handlePhoto(e) {
     reader.onload = async (event) => {
         addMsg(`<img src="${event.target.result}" id="check-img">`, "user", true);
         if (!model) {
-            addMsg("Не могу распознать, ИИ еще не загружен.", "bot");
+            addMsg("РќРµ РјРѕРіСѓ СЂР°СЃРїРѕР·РЅР°С‚СЊ, РР РµС‰Рµ РЅРµ Р·Р°РіСЂСѓР¶РµРЅ.", "bot");
         } else {
-            addMsg("Анализирую фото...", "bot");
+            addMsg("РђРЅР°Р»РёР·РёСЂСѓСЋ С„РѕС‚Рѕ...", "bot");
             const predictions = await model.classify(document.getElementById('check-img'));
-            addMsg(`Это похоже на: ${predictions[0].className}`, "bot");
+            addMsg(`Р­С‚Рѕ РїРѕС…РѕР¶Рµ РЅР°: ${predictions[0].className}`, "bot");
         }
     };
     reader.readAsDataURL(file);
