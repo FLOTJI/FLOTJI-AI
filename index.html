@@ -2,17 +2,22 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FLOTJI-AI PRO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
-        <header>FLOTJI • NEURAL CORE</header>
+        <header>
+            <span class="logo">FLOTJI • NEURAL CORE</span>
+            <button id="mute-btn" title="Включить/Выключить звук">🔊</button>
+        </header>
+        
         <div id="chat-window"></div>
+        
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Введите запрос..." autocomplete="off">
-            <button id="send-btn">SEND</button>
+            <input type="text" id="user-input" placeholder="Спроси что-нибудь..." autocomplete="off">
+            <button id="send-btn">Отправить</button>
         </div>
     </div>
     <script src="script.js"></script>
