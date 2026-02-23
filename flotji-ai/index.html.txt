@@ -14,7 +14,7 @@
 <div id="app">
     <header>
         <div class="logo-circle"></div>
-        <div id="status">«¿√–”« ¿...</div>
+        <div id="status">–ó–ê–ì–†–£–ó–ö–ê...</div>
     </header>
 
     <div id="chat-window"></div>
@@ -23,11 +23,12 @@
         <label for="file-upload" class="action-btn">??</label>
         <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="handlePhoto(event)">
         
-        <input type="text" id="user-input" placeholder="—ÔÓÒË ‘ÎÓÚÊË..." autocomplete="off">
+        <input type="text" id="user-input" placeholder="√ë√Ø√∞√Æ√±√® √î√´√Æ√≤√¶√®..." autocomplete="off">
         <button onclick="handleText()" class="action-btn">?</button>
     </div>
 </div>
 
 <script src="script.js"></script>
 </body>
+
 </html>
