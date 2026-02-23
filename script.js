@@ -1,3 +1,14 @@
+// Функция для входа в полноэкранный режим (имитация приложения)
+document.body.onclick = () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => console.log(e));
+    }
+};
+
+// Запрет на выключение экрана (если поддерживается браузером)
+if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').catch(console.error);
+}
 const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const btn = document.getElementById('send-btn');
@@ -152,3 +163,4 @@ muteBtn.onclick = () => {
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
 window.onload = () => botType("Система FLOTJI активна. Жду команду.");
+
