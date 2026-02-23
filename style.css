@@ -1,45 +1,53 @@
+/* --- ОСНОВНЫЕ ПЕРЕМЕННЫЕ --- */
 :root {
     --bg: #0d1117;
-    --panel: rgba(22, 27, 34, 0.95);
+    --panel: #161b22;
     --accent: #58a6ff;
     --user-msg: #21262d;
     --bot-msg: #161b22;
     --text: #c9d1d9;
+    --border: #30363d;
+}
+
+/* --- СБРОС СТИЛЕЙ --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent; /* Убирает синий блик при нажатии на телефоне */
 }
 
 body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Запрещаем общий скролл страницы */
 }
 
+/* --- ГЛАВНЫЙ КОНТЕЙНЕР --- */
 .app-container {
     width: 100%;
     max-width: 500px;
-    height: 95vh;
+    height: 100vh; /* Занимает всю высоту экрана */
     background: var(--panel);
-    border: 1px solid #30363d;
-    border-radius: 20px;
     display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    flex-direction: column; /* Элементы идут строго друг за другом сверху вниз */
+    position: relative;
 }
 
+/* --- ШАПКА (Название слева) --- */
 header {
-    padding: 10px 15px;
+    padding: 0 15px;
+    height: 60px;
     background: #161b22;
-    border-bottom: 1px solid #30363d;
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Расталкивает логотип влево, а кнопку вправо */
-    position: relative;
-    min-height: 50px;
+    justify-content: space-between;
+    flex-shrink: 0; /* Шапка не сжимается */
 }
 
 .logo {
@@ -47,85 +55,123 @@ header {
     color: var(--accent);
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    
-    /* Убираем центровку и фиксируем слева */
-    position: static; 
-    transform: none;
-    margin-left: 5px; 
+    font-size: 0.9rem;
 }
+
 #mute-btn {
     background: none;
     border: none;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
-    z-index: 10;
 }
 
+/* --- ОКНО ЧАТА (Гибкое) --- */
 #chat-window {
-    flex: 1;
+    flex: 1; /* Занимает всё доступное пространство между шапкой и вводом */
     overflow-y: auto;
-    padding: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    background: var(--bg);
 }
 
+/* --- СООБЩЕНИЯ --- */
 .msg {
-    max-width: 80%;
+    max-width: 85%;
     padding: 12px 16px;
-    border-radius: 15px;
+    border-radius: 18px;
     font-size: 15px;
-    animation: fadeIn 0.3s ease;
+    line-height: 1.4;
+    word-wrap: break-word;
+    animation: fadeIn 0.2s ease-out;
 }
 
-.user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
-.bot { align-self: flex-start; background: var(--bot-msg); border: 1px solid #30363d; border-bottom-left-radius: 2px; }
+.user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
 
+.bot {
+    align-self: flex-start;
+    background: var(--bot-msg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+}
+
+/* --- ЗОНА ВВОДА (Всегда внизу) --- */
 .input-area {
-    padding: 15px;
+    padding: 10px;
     display: flex;
-    gap: 10px;
-    background: #0d1117;
     align-items: center;
+    gap: 8px;
+    background: #161b22;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0; /* Поле ввода не сжимается */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* Учет вырезов снизу на новых телефонах */
 }
 
 input {
     flex: 1;
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #0d1117;
+    border: 1px solid var(--border);
     color: white;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 12px 15px;
+    border-radius: 25px; /* Скругленные края для красоты */
     outline: none;
+    font-size: 16px; /* Важно: 16px предотвращает авто-зум в iOS */
 }
 
+input:focus {
+    border-color: var(--accent);
+}
+
+/* --- КНОПКИ --- */
 #mic-btn {
     background: #21262d;
     border: none;
     border-radius: 50%;
     width: 45px;
     height: 45px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: 0.3s;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.3s;
+    flex-shrink: 0;
 }
 
 #send-btn {
     background: var(--accent);
     border: none;
     color: white;
-    padding: 12px 15px;
-    border-radius: 10px;
+    padding: 0 15px;
+    height: 45px;
+    border-radius: 25px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
+#send-btn:active, #mic-btn:active {
+    transform: scale(0.95);
+}
+
+/* --- АНИМАЦИИ --- */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Кастомизация скроллбара */
+#chat-window::-webkit-scrollbar {
+    width: 4px;
+}
+#chat-window::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
