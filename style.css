@@ -36,24 +36,15 @@ header {
     background: #161b22;
     border-bottom: 1px solid #30363d;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: flex-end; /* Кнопка звука уходит вправо */
-    position: relative;
-    min-height: 40px;
 }
 
 .logo {
     font-weight: bold;
     color: var(--accent);
-    letter-spacing: 2px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    text-transform: uppercase;
-    font-size: 0.9rem;
+    letter-spacing: 1px;
 }
-
 #mute-btn, #mic-btn {
     background: none;
     border: none;
@@ -125,3 +116,4 @@ input {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
