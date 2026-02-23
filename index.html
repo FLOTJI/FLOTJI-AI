@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini Flash Edition</title>
+    <title>FLOTJI-AI</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
@@ -15,21 +15,17 @@
     <header class="main-header">
         <div class="ai-status">
             <span class="dot"></span>
-            <span id="status-text">Gemini 3 Flash</span>
+            <span id="status-text">FLOTJI-AI</span>
         </div>
     </header>
 
-    <main id="chat-window">
-        <div class="msg bot">Привет! Я твоя обновленная нейросеть. Чем могу помочь?</div>
-    </main>
+    <main id="chat-window"></main>
 
     <footer class="input-area">
         <div class="input-wrapper">
             <label for="file-upload" class="icon-btn">📎</label>
             <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="handlePhoto(event)">
-            
-            <input type="text" id="user-input" placeholder="Введите запрос..." autocomplete="off">
-            
+            <input type="text" id="user-input" placeholder="Спросить FLOTJI-AI..." autocomplete="off">
             <button id="send-btn" class="icon-btn">➤</button>
         </div>
     </footer>
