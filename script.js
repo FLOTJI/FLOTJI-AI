@@ -1,41 +1,41 @@
-// --- ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ И ПАМЯТИ ---
 const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const btn = document.getElementById('send-btn');
+const muteBtn = document.getElementById('mute-btn');
 
-// База знаний + загрузка из LocalStorage
+let isMuted = false;
+
+// ПАМЯТЬ
 let aiMemory = JSON.parse(localStorage.getItem('flotji_brain')) || {
-    "привет": "Системы FLOTJI-AI онлайн. Я готов к работе и общению.",
-    "кто ты": "Я твой персональный ИИ-ассистент. Я могу считать, генерировать пароли и обучаться.",
-    "что ты умеешь": "Мой функционал включает: голосовую озвучку, математические вычисления, генерацию ключей безопасности и самообучение.",
-    "команды": "Попробуй: 'пароль', 'время', '2+2' или научи меня: 'Запомни, что [вопрос] — [ответ]'"
+    "привет": "Системы онлайн. Я готов к работе.",
+    "кто ты": "Я твой персональный ИИ-ассистент FLOTJI.",
+    "что ты умеешь": "Я умею считать, создавать пароли, переводить текст и обучаться новым фразам.",
+    "команды": "Напиши: 'пароль', 'время', '2+2' или 'Запомни, что [вопрос] - [ответ]'"
 };
 
-// Функция сохранения знаний
-function saveKnowledge() {
-    localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
-}
+// ЛОГИКА ЗВУКА
+muteBtn.onclick = () => {
+    isMuted = !isMuted;
+    muteBtn.textContent = isMuted ? "🔇" : "🔊";
+    if (isMuted) window.speechSynthesis.cancel();
+};
 
-// --- ГОЛОСОВОЙ МОДУЛЬ ---
 function speak(text) {
-    // Отменяем текущую озвучку, если она идет, чтобы не накладывалась
+    if (isMuted) return;
     window.speechSynthesis.cancel();
-    
     const msg = new SpeechSynthesisUtterance();
     msg.text = text;
     msg.lang = 'ru-RU';
-    msg.pitch = 1.1; // Немного футуристичный тон
-    msg.rate = 1;    // Скорость речи
+    msg.rate = 1;
     window.speechSynthesis.speak(msg);
 }
 
-// --- ВИЗУАЛЬНЫЙ ВЫВОД (ПЕЧАТЬ) ---
+// ПЕЧАТЬ ТЕКСТА
 async function botType(text) {
     const d = document.createElement('div');
     d.className = "msg bot";
     chat.appendChild(d);
     
-    // Запускаем озвучку параллельно с печатью
     speak(text);
 
     let i = 0;
@@ -46,7 +46,7 @@ async function botType(text) {
             clearInterval(interval);
             chat.scrollTop = chat.scrollHeight;
         }
-    }, 25); // Скорость появления букв
+    }, 20);
 }
 
 function addMsg(text, type) {
@@ -57,7 +57,7 @@ function addMsg(text, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
-// --- ЛОГИЧЕСКИЙ ЦЕНТР ОБРАБОТКИ ---
+// ОБРАБОТКА КОМАНД
 async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
@@ -68,51 +68,30 @@ async function handleSend() {
 
     let response = "";
 
-    // 1. Модуль обучения (Приоритет №1)
+    // 1. Обучение
     if (low.includes("запомни, что")) {
         const clean = val.replace(/запомни, что/i, "").trim();
         const parts = clean.split(/[—-]/);
         if (parts.length === 2) {
-            const key = parts[0].trim().toLowerCase();
-            const value = parts[1].trim();
-            aiMemory[key] = value;
-            saveKnowledge();
-            response = `Принято. Я интегрировал знание о "${key}" в свою базу данных.`;
-        } else {
-            response = "Для обучения используй формат: Запомни, что [вопрос] — [ответ].";
+            aiMemory[parts[0].trim().toLowerCase()] = parts[1].trim();
+            localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
+            response = "Понял, я это запомнил!";
         }
     }
 
-    // 2. Модуль безопасности (Пароли)
-    else if (low.includes("пароль") || low.includes("pass")) {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-        let pass = "";
-        for (let i = 0; i < 14; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
-        response = "Сгенерирован зашифрованный ключ: " + pass;
+    // 2. Пароль
+    else if (low.includes("пароль")) {
+        response = "Твой пароль: " + Math.random().toString(36).slice(-10).toUpperCase();
     }
 
-    // 3. Лингвистический модуль (Перевод)
-    else if (low.startsWith("переведи")) {
-        const textToTranslate = val.replace(/переведи/i, "").trim();
-        if (textToTranslate) {
-            window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(textToTranslate)}`, '_blank');
-            response = "Открываю модуль перевода для текста: " + textToTranslate;
-        }
-    }
-
-    // 4. Математический процессор
+    // 3. Математика
     else if (/[0-9]/.test(val) && /[+\-*/]/.test(val)) {
         try {
-            // Очистка строки от лишних символов для безопасности eval
-            const cleanMath = val.replace(/[^-()\d/*+.]/g, '');
-            const res = new Function('return ' + cleanMath)();
-            response = "Результат вычисления: " + res;
-        } catch(e) { 
-            response = "Обнаружена ошибка в математическом выражении."; 
-        }
+            response = "Результат: " + eval(val.replace(/[^-()\d/*+.]/g, ''));
+        } catch(e) { response = "Не могу посчитать этот пример."; }
     }
 
-    // 5. Поиск в ассоциативной памяти
+    // 4. Поиск в памяти (гибкий)
     else {
         for (let key in aiMemory) {
             if (low.includes(key)) {
@@ -122,25 +101,17 @@ async function handleSend() {
         }
     }
 
-    // 6. Системные утилиты (Время/Дата) и ответ по умолчанию
+    // 5. Системные или заглушка
     if (!response) {
-        if (low.includes("время")) {
-            response = "Текущее системное время: " + new Date().toLocaleTimeString();
-        } else if (low.includes("дата") || low.includes("число")) {
-            response = "Сегодня: " + new Date().toLocaleDateString();
-        } else {
-            response = "Моих алгоритмов пока недостаточно для ответа на этот вопрос. Ты можешь обучить меня через команду 'Запомни, что...'.";
-        }
+        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
+        else if (low.includes("дата")) response = "Сегодня " + new Date().toLocaleDateString();
+        else response = "Я пока не знаю, что ответить. Научи меня через 'Запомни, что...'";
     }
 
     await botType(response);
 }
 
-// --- СЛУШАТЕЛИ СОБЫТИЙ ---
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
 
-// Стартовое приветствие
-window.onload = () => {
-    botType("Система FLOTJI-AI PRO активирована. Голос и интеллект в норме.");
-};
+window.onload = () => botType("Система активна. Звук включен.");
