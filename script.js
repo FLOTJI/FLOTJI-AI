@@ -5,27 +5,18 @@ const muteBtn = document.getElementById('mute-btn');
 const micBtn = document.getElementById('mic-btn');
 
 let isMuted = false;
+let isListening = false;
+
+// РАСШИРЕННАЯ ПАМЯТЬ
 let aiMemory = JSON.parse(localStorage.getItem('flotji_brain')) || {
     "привет": "Системы онлайн. Я готов к работе.",
     "кто ты": "Я твой персональный ИИ-ассистент FLOTJI.",
     "умеешь": "Я умею считать, создавать пароли, переводить текст и обучаться!",
-    "можешь": "Я могу быть твоим голосовым помощником и выполнять команды.",
-    "команды": "Скажи 'пароль', 'время' или обучи: 'Запомни, что...'"
+    "команды": "Скажи 'пароль', 'время' или обучи: 'Запомни, что [вопрос] - [ответ]'",
+    "создатель": "Меня создал гениальный разработчик с помощью нейросетей."
 };
-// ПАМЯТЬ
-// 4. Улучшенный поиск в памяти (ищет совпадения по частям слов)
-    else {
-        for (let key in aiMemory) {
-            // Если ключ из памяти есть в твоем вопросе 
-            // ИЛИ твой вопрос содержит часть ключа
-            if (low.includes(key.slice(0, 5)) || key.includes(low.slice(0, 5))) {
-                response = aiMemory[key];
-                break;
-            }
-        }
-    }
 
-// ГОЛОСОВОЙ ВЫВОД (ОЗВУЧКА)
+// ОЗВУЧКА
 function speak(text) {
     if (isMuted) return;
     window.speechSynthesis.cancel();
@@ -35,28 +26,99 @@ function speak(text) {
     window.speechSynthesis.speak(msg);
 }
 
-// РАСПОЗНАВАНИЕ РЕЧИ (СЛУХ)
+// СЛУХ (Speech Recognition)
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
     recognition.lang = 'ru-RU';
+    recognition.continuous = false;
 
     micBtn.onclick = () => {
-        recognition.start();
-        micBtn.style.boxShadow = "0 0 15px red";
+        if (!isListening) {
+            recognition.start();
+            isListening = true;
+            micBtn.style.boxShadow = "0 0 15px #58a6ff";
+            micBtn.textContent = "🔊";
+        } else {
+            recognition.stop();
+            isListening = false;
+            micBtn.style.boxShadow = "none";
+            micBtn.textContent = "🎤";
+        }
     };
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        input.value = transcript;
-        handleSend();
-        micBtn.style.boxShadow = "none";
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        
+        // Режим активации по имени
+        if (transcript.includes("флотжи") || transcript.includes("флоджи")) {
+            const query = transcript.replace(/флотжи|флоджи/gi, "").trim();
+            if (query) {
+                input.value = query;
+                handleSend();
+            } else {
+                botType("Да, я слушаю!");
+            }
+        } else {
+            // Если имя не названо, просто вставляем текст
+            input.value = transcript;
+        }
     };
 
-    recognition.onerror = () => { micBtn.style.boxShadow = "none"; };
+    recognition.onend = () => {
+        if (isListening) recognition.start(); // Перезапуск для эффекта "Станции"
+    };
 }
 
-// ПЕЧАТЬ И ОБРАБОТКА
+// ЛОГИКА ОТВЕТОВ
+async function handleSend() {
+    const val = input.value.trim();
+    if (!val) return;
+
+    addMsg(val, 'user');
+    const low = val.toLowerCase();
+    input.value = "";
+    let response = "";
+
+    // 1. Обучение
+    if (low.includes("запомни, что")) {
+        const clean = val.replace(/запомни, что/i, "").trim();
+        const parts = clean.split(/[—-]/);
+        if (parts.length === 2) {
+            aiMemory[parts[0].trim().toLowerCase()] = parts[1].trim();
+            localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
+            response = "Принято, я это запомнил!";
+        }
+    } 
+    // 2. Пароль
+    else if (low.includes("пароль")) {
+        response = "Безопасный ключ: " + Math.random().toString(36).slice(-10).toUpperCase();
+    }
+    // 3. Математика
+    else if (/[0-9]/.test(val) && /[+\-*/]/.test(val)) {
+        try { response = "Результат: " + eval(val.replace(/[^-()\d/*+.]/g, '')); } 
+        catch(e) { response = "Ошибка в расчетах."; }
+    }
+    // 4. УМНЫЙ ПОИСК (по корням слов)
+    else {
+        for (let key in aiMemory) {
+            if (low.includes(key.slice(0, 4))) { // Ищем совпадение первых 4-х букв
+                response = aiMemory[key];
+                break;
+            }
+        }
+    }
+
+    // 5. Финальный ответ
+    if (!response) {
+        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
+        else if (low.includes("дата")) response = "Сегодня " + new Date().toLocaleDateString();
+        else response = "Я пока не знаю ответа. Научи меня: 'Запомни, что [вопрос] - [ответ]'.";
+    }
+
+    await botType(response);
+}
+
 async function botType(text) {
     const d = document.createElement('div');
     d.className = "msg bot";
@@ -81,40 +143,6 @@ function addMsg(text, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
-async function handleSend() {
-    const val = input.value.trim();
-    if (!val) return;
-    addMsg(val, 'user');
-    const low = val.toLowerCase();
-    input.value = "";
-    let response = "";
-
-    if (low.includes("запомни, что")) {
-        const clean = val.replace(/запомни, что/i, "").trim();
-        const parts = clean.split(/[—-]/);
-        if (parts.length === 2) {
-            aiMemory[parts[0].trim().toLowerCase()] = parts[1].trim();
-            localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
-            response = "Запомнил!";
-        }
-    } else if (low.includes("пароль")) {
-        response = "Ключ: " + Math.random().toString(36).slice(-8).toUpperCase();
-    } else if (/[0-9]/.test(val) && /[+\-*/]/.test(val)) {
-        try { response = "Результат: " + eval(val.replace(/[^-()\d/*+.]/g, '')); } 
-        catch(e) { response = "Ошибка в примере."; }
-    } else {
-        for (let key in aiMemory) {
-            if (low.includes(key)) { response = aiMemory[key]; break; }
-        }
-    }
-
-    if (!response) {
-        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
-        else response = "Я учусь. Попробуй обучить меня через 'Запомни, что...'";
-    }
-    await botType(response);
-}
-
 muteBtn.onclick = () => {
     isMuted = !isMuted;
     muteBtn.textContent = isMuted ? "🔇" : "🔊";
@@ -123,5 +151,4 @@ muteBtn.onclick = () => {
 
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
-window.onload = () => botType("Система FLOTJI активирована. Я тебя слушаю.");
-
+window.onload = () => botType("Система FLOTJI активна. Жду команду.");
