@@ -5,13 +5,25 @@ const muteBtn = document.getElementById('mute-btn');
 const micBtn = document.getElementById('mic-btn');
 
 let isMuted = false;
-
-// ПАМЯТЬ
 let aiMemory = JSON.parse(localStorage.getItem('flotji_brain')) || {
     "привет": "Системы онлайн. Я готов к работе.",
     "кто ты": "Я твой персональный ИИ-ассистент FLOTJI.",
+    "умеешь": "Я умею считать, создавать пароли, переводить текст и обучаться!",
+    "можешь": "Я могу быть твоим голосовым помощником и выполнять команды.",
     "команды": "Скажи 'пароль', 'время' или обучи: 'Запомни, что...'"
 };
+// ПАМЯТЬ
+// 4. Улучшенный поиск в памяти (ищет совпадения по частям слов)
+    else {
+        for (let key in aiMemory) {
+            // Если ключ из памяти есть в твоем вопросе 
+            // ИЛИ твой вопрос содержит часть ключа
+            if (low.includes(key.slice(0, 5)) || key.includes(low.slice(0, 5))) {
+                response = aiMemory[key];
+                break;
+            }
+        }
+    }
 
 // ГОЛОСОВОЙ ВЫВОД (ОЗВУЧКА)
 function speak(text) {
@@ -112,3 +124,4 @@ muteBtn.onclick = () => {
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
 window.onload = () => botType("Система FLOTJI активирована. Я тебя слушаю.");
+
