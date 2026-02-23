@@ -10,6 +10,13 @@ function addMsg(text, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
+// Приветствие при загрузке
+window.onload = () => {
+    setTimeout(() => {
+        addMsg("Система FLOTJI-AI активирована. Я готов к работе. Чем могу помочь?", "bot");
+    }, 500);
+};
+
 async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
@@ -17,16 +24,16 @@ async function handleSend() {
     addMsg(val, 'user');
     input.value = "";
 
-    // Эффект "печатает..."
     setTimeout(() => {
-        let response = "Я получил твой запрос. Давай проанализируем это подробнее.";
-        
+        let response = "Запрос принят в обработку FLOTJI-AI. Нужно больше данных.";
         const low = val.toLowerCase();
-        if (low.includes("привет")) response = "Привет! Я твой ИИ-ассистент в новой оболочке. Чем займемся?";
-        if (low.includes("кто ты")) response = "Я Gemini 3 Flash, адаптированный для твоего личного приложения.";
+
+        if (low.includes("привет")) response = "Приветствую! На связи FLOTJI-AI. Как твои дела?";
+        if (low.includes("кто ты")) response = "Я FLOTJI-AI — твой персональный искусственный интеллект.";
+        if (low.includes("как дела")) response = "Мои системы работают в штатном режиме. Все отлично!";
         
         addMsg(response, 'bot');
-    }, 800);
+    }, 700);
 }
 
 btn.onclick = handleSend;
