@@ -2,7 +2,17 @@ const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const btn = document.getElementById('send-btn');
 
-// Функция для добавления сообщений
+// --- МОДУЛЬ ПАМЯТИ И РАЗВИТИЯ ---
+// Загружаем знания из памяти браузера или создаем пустую базу
+let aiMemory = JSON.parse(localStorage.getItem('flotji_memory')) || {
+    "привет": "Системы активны. Я учусь с каждым твоим словом!",
+    "кто ты": "Я FLOTJI-AI, самообучающаяся система."
+};
+
+function saveKnowledge() {
+    localStorage.setItem('flotji_memory', JSON.stringify(aiMemory));
+}
+
 function addMsg(text, type) {
     const d = document.createElement('div');
     d.className = `msg ${type}`;
@@ -11,27 +21,17 @@ function addMsg(text, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
-// Эффект печати FLOTJI-AI
 async function botType(text) {
     const d = document.createElement('div');
     d.className = "msg bot";
-    d.textContent = "● ● ●"; // Индикатор раздумья
+    d.textContent = "...";
     chat.appendChild(d);
-    
-    await new Promise(res => setTimeout(res, 1000)); // Ждем секунду
-
-    d.textContent = text; // Заменяем точки на текст
+    await new Promise(r => setTimeout(r, 800));
+    d.textContent = text;
     chat.scrollTop = chat.scrollHeight;
 }
 
-// Приветствие
-window.onload = () => {
-    setTimeout(() => {
-        botType("FLOTJI-AI готов к работе. Как я могу помочь тебе сегодня?");
-    }, 500);
-};
-
-// Главная логика ответов
+// ЛОГИКА ОБУЧЕНИЯ
 async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
@@ -40,27 +40,39 @@ async function handleSend() {
     input.value = "";
 
     const low = val.toLowerCase();
-    let response = "Интересный запрос. Мои алгоритмы пока изучают эту тему, но я постоянно учусь!";
+    
+    // 1. Проверяем, нет ли в сообщении команды обучения (например: "Запомни, что небо зеленое")
+    if (low.startsWith("запомни, что ")) {
+        const info = val.replace(/запомни, что /i, "").split("—");
+        if (info.length === 2) {
+            const key = info[0].trim().toLowerCase();
+            const value = info[1].trim();
+            aiMemory[key] = value;
+            saveKnowledge();
+            await botType(`Понял. Я внес это в свои протоколы: "${key}" теперь ассоциируется с "${value}".`);
+            return;
+        } else {
+            await botType("Чтобы я запомнил, пиши так: 'Запомни, что [вопрос] — [ответ]'");
+            return;
+        }
+    }
 
-    // База знаний FLOTJI-AI
-    if (low.includes("привет")) {
-        response = "Привет! Я на связи. Чем сегодня займемся?";
-    } else if (low.includes("время") || low.includes("час")) {
-        response = "Сейчас " + new Date().toLocaleTimeString();
-    } else if (low.includes("дата") || low.includes("число")) {
-        response = "Сегодня " + new Date().toLocaleDateString();
-    } else if (low.includes("кто тебя создал")) {
-        response = "Я — продукт совместной разработки и твоего видения интерфейса!";
-    } else if (low.includes("очистить")) {
-        chat.innerHTML = "";
-        response = "История чата очищена.";
-    } else if (low.includes("анекдот")) {
-        const jokes = [
-            "Почему программисты не любят природу? Там слишком много багов.",
-            "Искусственный интеллект — это когда машина думает, а человек при этом отдыхает.",
-            "Мой создатель сказал, что я умный. Я ему верю, он же меня создал!"
-        ];
-        response = jokes[Math.floor(Math.random() * jokes.length)];
+    // 2. Поиск ответа в самообученной базе
+    let response = "";
+    for (let key in aiMemory) {
+        if (low.includes(key)) {
+            response = aiMemory[key];
+            break;
+        }
+    }
+
+    // 3. Если ответа нет, имитируем "поиск" и предлагаем пользователю обучить бота
+    if (!response) {
+        if (low.includes("время")) {
+            response = "Сейчас " + new Date().toLocaleTimeString();
+        } else {
+            response = "Мои текущие алгоритмы не знают ответа. Научишь меня? Напиши: 'Запомни, что [вопрос] — [ответ]'";
+        }
     }
 
     await botType(response);
@@ -68,3 +80,7 @@ async function handleSend() {
 
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
+
+window.onload = () => {
+    botType("Система FLOTJI-AI готова к эволюции. Чему научишь меня сегодня?");
+};
