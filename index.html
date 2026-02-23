@@ -2,21 +2,39 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOTJI AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gemini Flash Edition</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.2.1/dist/mobilenet.min.js"></script>
 </head>
 <body>
-    <div id="app" style="display: flex; flex-direction: column; height: 100vh; max-width: 500px; margin: auto; border: 1px solid #ccc;">
-        <header style="padding: 10px; text-align: center; background: #724ae8; color: white;">FLOTJI AI</header>
-        <div id="chat-window" style="flex: 1; overflow-y: auto; padding: 10px; background: #f9f9f9;"></div>
-        <div style="padding: 10px; display: flex; gap: 5px;">
-            <input type="text" id="user-input" style="flex: 1; padding: 10px;" placeholder="Сообщение...">
-            <button id="send-btn" style="padding: 10px; background: #724ae8; color: white; border: none;">OK</button>
+
+<div class="app-container">
+    <header class="main-header">
+        <div class="ai-status">
+            <span class="dot"></span>
+            <span id="status-text">Gemini 3 Flash</span>
         </div>
-    </div>
-    <script src="script.js"></script>
+    </header>
+
+    <main id="chat-window">
+        <div class="msg bot">Привет! Я твоя обновленная нейросеть. Чем могу помочь?</div>
+    </main>
+
+    <footer class="input-area">
+        <div class="input-wrapper">
+            <label for="file-upload" class="icon-btn">📎</label>
+            <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+            
+            <input type="text" id="user-input" placeholder="Введите запрос..." autocomplete="off">
+            
+            <button id="send-btn" class="icon-btn">➤</button>
+        </div>
+    </footer>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
