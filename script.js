@@ -1,45 +1,36 @@
-let model = null;
-const chat = document.getElementById('chat-window');
-const input = document.getElementById('user-input');
-const status = document.getElementById('status');
+const chatWindow = document.getElementById('chat-window');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
 
-// Запуск ИИ
-async function init() {
-    try {
-        status.innerText = "СИСТЕМА ГРУЗИТСЯ...";
-        model = await mobilenet.load();
-        status.innerText = "FLOTJI: В СЕТИ";
-        addMsg("Я готов к работе! Спроси меня о чем-нибудь или пришли фото.", "bot");
-    } catch (e) {
-        status.innerText = "ИИ В ОФФЛАЙНЕ";
-        addMsg("Привет! Я пока работаю в режиме простого чата.", "bot");
-    }
-}
-init();
-
-function addMsg(text, type, isHTML = false) {
+function addMsg(text, type) {
     const d = document.createElement('div');
-    d.className = `msg ${type}`;
-    if (isHTML) d.innerHTML = text; else d.textContent = text;
-    chat.appendChild(d);
-    chat.scrollTop = chat.scrollHeight;
+    d.style.margin = "5px";
+    d.style.padding = "10px";
+    d.style.borderRadius = "10px";
+    d.style.background = type === 'user' ? '#724ae8' : '#e0e0e0';
+    d.style.color = type === 'user' ? 'white' : 'black';
+    d.style.alignSelf = type === 'user' ? 'flex-end' : 'flex-start';
+    d.textContent = text;
+    chatWindow.appendChild(d);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-function handleText() {
-    const val = input.value.trim();
+// Кнопка теперь точно сработает
+sendBtn.onclick = function() {
+    const val = userInput.value.trim();
     if (!val) return;
-    addMsg(val, "user");
-    input.value = "";
+    
+    addMsg(val, 'user');
+    userInput.value = "";
 
     setTimeout(() => {
-        let res = "Я тебя не совсем понял, но я учусь!";
-        const low = val.toLowerCase();
+        addMsg("Я получил твое сообщение! Работаю над ответом.", "bot");
+    }, 500);
+};
 
-        if (low.includes("привет")) res = "Привет! Я Флотжи, твой ИИ.";
-        else if (low.includes("как дела")) res = "У меня всё отлично, летаю по проводам интернета!";
-        else if (low.includes("покажи")) {
-            const q = low.replace("покажи", "").trim() || "neon";
-            res = "Вот что я нашел по запросу: " + q;
-            addMsg(`<img src="https://loremflickr.com/400/300/${q}?random=${Math.random()}">`, "bot", true);
-        }
-        addMsg(res, "bot");
+// Отправка по Enter
+userInput.onkeypress = function(e) {
+    if (e.key === 'Enter') sendBtn.click();
+};
+
+addMsg("Привет! Теперь я работаю без ошибок. Напиши мне!", "bot");
