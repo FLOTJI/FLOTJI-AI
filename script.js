@@ -1,89 +1,103 @@
-// 1. ПАМЯТЬ И БАЗОВЫЕ ЗНАНИЯ
+// --- МОЗГ FLOTJI-AI PRO (POWERED BY LOGIC) ---
 const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const btn = document.getElementById('send-btn');
 
 let aiMemory = JSON.parse(localStorage.getItem('flotji_brain')) || {
-    "привет": "Привет! Я FLOTJI-AI. Рад тебя видеть!",
-    "кто ты": "Я твой персональный ИИ-ассистент. Я могу учиться, считать и помогать в делах.",
-    "как дела": "У меня всё отлично, мои системы работают на 100%. Как твоё настроение?",
-    "что ты умеешь": "Я многозадачный: \n• Считаю математику (2+2)\n• Создаю сложные пароли\n• Перевожу фразы\n• Запоминаю факты\n• Подсказываю время и дату",
-    "команды": "Попробуй:\n1. Написать пример (например, 540/4)\n2. Написать 'пароль'\n3. Написать 'переведи [текст]'\n4. Обучить меня: 'Запомни, что [вопрос] — [ответ]'"
+    "привет": "Системы FLOTJI-AI онлайн. Чем я могу помочь вам как ваш персональный интеллект?",
+    "что ты умеешь": "Я объединяю логику калькулятора, креативность генератора и память ассистента. \n\nЯ могу:\n1. Решать сложные уравнения\n2. Генерировать идеи и пароли\n3. Анализировать текст и переводить его\n4. Обучаться вашим фактам\n5. Управлять интерфейсом",
+    "кто тебя создал": "Я был разработан как проект FLOTJI, вдохновленный архитектурой больших языковых моделей, таких как Gemini.",
+    "коды": "Я понимаю базовый JavaScript. Можешь спросить меня о функциях или переменных."
 };
 
 function saveKnowledge() {
     localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
 }
 
-// 2. ИНТЕРФЕЙС
-function addMsg(text, type) {
-    const d = document.createElement('div');
-    d.className = `msg ${type}`;
-    d.textContent = text;
-    chat.appendChild(d);
-    chat.scrollTop = chat.scrollHeight;
-}
-
+// Эффект "Нейронного раздумья"
 async function botType(text) {
     const d = document.createElement('div');
     d.className = "msg bot";
-    d.innerHTML = '<span class="typing">...</span>';
+    d.innerHTML = '<span class="ai-thinking">Анализ запроса...</span>';
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;
-    await new Promise(r => setTimeout(r, 600));
-    d.textContent = text;
-    chat.scrollTop = chat.scrollHeight;
+
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Плавное появление текста
+    d.textContent = "";
+    let i = 0;
+    const interval = setInterval(() => {
+        d.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+        chat.scrollTop = chat.scrollHeight;
+    }, 15);
 }
 
-// 3. ЛОГИКА ОБРАБОТКИ
+// Функция генерации идей (Креативный модуль)
+function generateIdea() {
+    const ideas = [
+        "Создать мобильное приложение для учета выпитой воды.",
+        "Написать бота, который пересказывает книги за 1 минуту.",
+        "Разработать сайт-портфолио в стиле киберпанк.",
+        "Сделать игру на JS, где нужно управлять гравитацией."
+    ];
+    return ideas[Math.floor(Math.random() * ideas.length)];
+}
+
 async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
 
-    addMsg(val, 'user');
+    const d = document.createElement('div');
+    d.className = "msg user";
+    d.textContent = val;
+    chat.appendChild(d);
+    
     const low = val.toLowerCase();
     input.value = "";
+    chat.scrollTop = chat.scrollHeight;
 
     let response = "";
 
-    // А) ПРОВЕРКА НА ОБУЧЕНИЕ (Запомни, что...)
+    // 1. ЛОГИКА ОБУЧЕНИЯ
     if (low.includes("запомни, что")) {
         const clean = val.replace(/запомни, что/i, "").trim();
-        const parts = clean.includes("—") ? clean.split("—") : clean.split("-");
+        const parts = clean.split(/[—-]/);
         if (parts.length === 2) {
             aiMemory[parts[0].trim().toLowerCase()] = parts[1].trim();
             saveKnowledge();
-            response = `Принято! Теперь я знаю, что "${parts[0].trim()}" — это "${parts[1].trim()}".`;
+            response = "Информация интегрирована в мою долговременную память.";
         }
     }
 
-    // Б) ПРОВЕРКА НА ПАРОЛЬ
-    if (!response && (low.includes("пароль") || low.includes("pass"))) {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-        let pass = "";
-        for (let i = 0; i < 14; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
-        response = "Твой секретный пароль: " + pass;
+    // 2. КРЕАТИВНЫЙ МОДУЛЬ
+    if (!response && (low.includes("идея") || low.includes("придумай"))) {
+        response = "Вот идея для проекта: " + generateIdea();
     }
 
-    // В) ПРОВЕРКА НА ПЕРЕВОД
-    if (!response && low.startsWith("переведи")) {
-        const text = val.replace(/переведи/i, "").trim();
-        if (text) {
-            window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}`, '_blank');
-            response = "Открываю переводчик для тебя!";
-        }
-    }
-
-    // Г) ПРОВЕРКА НА МАТЕМАТИКУ (Только если есть знаки вычисления)
+    // 3. МАТЕМАТИЧЕСКИЙ ПРОЦЕССОР
     if (!response && /[0-9]/.test(val) && /[+\-*/]/.test(val)) {
         try {
-            const cleanMath = val.replace(/[^-()\d/*+.]/g, '');
-            const res = new Function('return ' + cleanMath)();
-            if (res !== undefined) response = "Результат: " + res;
-        } catch (e) { /* не математика */ }
+            const mathRes = eval(val.replace(/[^-()\d/*+.]/g, ''));
+            response = `Вычисление завершено. Результат: ${mathRes}`;
+        } catch(e) { response = "Ошибка в математическом синтаксисе."; }
     }
 
-    // Д) ПОИСК В БАЗЕ ЗНАНИЙ (Привет, умения и т.д.)
+    // 4. ГЕНЕРАТОР БЕЗОПАСНОСТИ
+    if (!response && low.includes("пароль")) {
+        response = "Сгенерирован ключ доступа: " + Math.random().toString(36).slice(-10).toUpperCase() + Math.random().toString(36).slice(-5);
+    }
+
+    // 5. ПЕРЕВОД И ПОИСК
+    if (!response && low.startsWith("переведи")) {
+        const t = val.replace(/переведи/i, "").trim();
+        window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(t)}`);
+        response = "Запрос перенаправлен в лингвистический модуль.";
+    }
+
+    // 6. СЕМАНТИЧЕСКИЙ ПОИСК В ПАМЯТИ
     if (!response) {
         for (let key in aiMemory) {
             if (low.includes(key)) {
@@ -93,24 +107,15 @@ async function handleSend() {
         }
     }
 
-    // Е) ВРЕМЯ / ДАТА
+    // 7. СТАНДАРТНЫЙ ИНТЕЛЛЕКТ
     if (!response) {
-        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        else if (low.includes("дата") || low.includes("число")) response = "Сегодня " + new Date().toLocaleDateString();
-    }
-
-    // Ё) ФИНАЛЬНЫЙ ВАРИАНТ (Если ничего не сработало)
-    if (!response) {
-        response = "Я записал твой запрос. Пока не знаю, что ответить, но ты можешь обучить меня через 'Запомни, что [вопрос] — [ответ]'.";
+        if (low.includes("время")) response = "Локальное время: " + new Date().toLocaleTimeString();
+        else if (low.includes("дата")) response = "Сегодняшнее число: " + new Date().toLocaleDateString();
+        else response = "Моих текущих данных недостаточно для точного ответа. Пожалуйста, обучите меня или уточните запрос.";
     }
 
     await botType(response);
 }
 
-// 4. ЗАПУСК
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
-
-window.onload = () => {
-    botType("Система FLOTJI-AI онлайн. Спроси меня: 'что ты умеешь'");
-};
