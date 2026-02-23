@@ -23,7 +23,7 @@
         <label for="file-upload" class="action-btn">??</label>
         <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="handlePhoto(event)">
         
-        <input type="text" id="user-input" placeholder="Ñïðîñè Ôëîòæè..." autocomplete="off">
+        <input type="text" id="user-input" placeholder="Спроси Флотжи..." autocomplete="off">
         <button onclick="handleText()" class="action-btn">?</button>
     </div>
 </div>
@@ -32,3 +32,4 @@
 </body>
 
 </html>
+
