@@ -56,12 +56,48 @@ function autoLearn(text) {
     });
 }
 
-async function handleSend() {
+async function handleSend()async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
 
     addMsg(val, 'user');
-    
+    autoLearn(val);
+    const low = val.toLowerCase();
+    input.value = "";
+
+    let response = "";
+
+    // --- НОВЫЙ БЛОК: МАТЕМАТИКА ---
+    // Проверяем, есть ли в строке цифры и знаки вычислений
+    if (/^[0-9+\-*/().\s]+$/.test(val) && /[0-9]/.test(val)) {
+        try {
+            // Вычисляем результат (безопасно через Function)
+            const result = new Function('return ' + val)();
+            response = "Результат вычислений: " + result;
+        } catch (e) {
+            response = "Математическая ошибка. Проверь правильность примера.";
+        }
+    } 
+    // --- КОНЕЦ БЛОКА МАТЕМАТИКИ ---
+
+    // Если это не математика, ищем в памяти
+    if (!response) {
+        for (let key in aiMemory) {
+            if (low.includes(key)) {
+                response = aiMemory[key];
+                break;
+            }
+        }
+    }
+
+    // Если всё еще нет ответа
+    if (!response) {
+        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
+        else response = "Я записал это в свою базу данных. Если хочешь научить меня отвечать иначе, напиши: 'Запомни, что [вопрос] — [ответ]'";
+    }
+
+    await botType(response);
+}
     // Запускаем процесс обучения на лету
     autoLearn(val);
     
@@ -94,3 +130,4 @@ input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
 window.onload = () => {
     botType("Я активирован и готов учиться у тебя.");
 };
+
