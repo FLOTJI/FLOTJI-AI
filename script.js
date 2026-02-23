@@ -1,17 +1,20 @@
+// --- ИНИЦИАЛИЗАЦИЯ И ПАМЯТЬ ---
 const chat = document.getElementById('chat-window');
 const input = document.getElementById('user-input');
 const btn = document.getElementById('send-btn');
 
-// --- ИНТЕЛЛЕКТУАЛЬНАЯ ПАМЯТЬ ---
+// Загружаем базу знаний из памяти браузера
 let aiMemory = JSON.parse(localStorage.getItem('flotji_brain')) || {
-    "привет": "Системы FLOTJI-AI активны. Я готов к саморазвитию!",
-    "кто ты": "Я самообучающийся интеллект. Каждое твоё слово делает меня умнее."
+    "привет": "Системы FLOTJI-AI активны. Чем могу помочь?",
+    "кто ты": "Я твой персональный ИИ-ассистент, способный к самообучению.",
+    "как дела": "Мои алгоритмы работают в штатном режиме. А у тебя?"
 };
 
 function saveKnowledge() {
     localStorage.setItem('flotji_brain', JSON.stringify(aiMemory));
 }
 
+// --- ФУНКЦИИ ИНТЕРФЕЙСА ---
 function addMsg(text, type) {
     const d = document.createElement('div');
     d.className = `msg ${type}`;
@@ -23,64 +26,81 @@ function addMsg(text, type) {
 async function botType(text) {
     const d = document.createElement('div');
     d.className = "msg bot";
-    d.textContent = "...";
+    d.innerHTML = '<span class="typing">...</span>';
     chat.appendChild(d);
-    await new Promise(r => setTimeout(r, 700));
+    chat.scrollTop = chat.scrollHeight;
+
+    await new Promise(r => setTimeout(r, 600)); // Имитация раздумья
     d.textContent = text;
     chat.scrollTop = chat.scrollHeight;
 }
 
-// --- АЛГОРИТМ АВТОНОМНОГО ОБУЧЕНИЯ ---
-function autoLearn(text) {
-    const lowText = text.toLowerCase();
-    
-    // Ищем паттерны типа "я люблю ...", "меня зовут ...", "... это ..."
-    const patterns = [
-        { regex: /меня зовут (.+)/i, key: "как меня зовут", prefix: "Тебя зовут " },
-        { regex: /я люблю (.+)/i, key: "что я люблю", prefix: "Ты любишь " },
-        { regex: /(.+) это (.+)/i, custom: true }
-    ];
-
-    patterns.forEach(p => {
-        const match = lowText.match(p.regex);
-        if (match) {
-            if (p.custom) {
-                // Если фраза типа "Лев это царь зверей"
-                aiMemory[match[1].trim()] = match[2].trim();
-            } else {
-                // Если фраза типа "Я люблю кофе"
-                aiMemory[p.key] = p.prefix + match[1].trim();
-            }
-            saveKnowledge();
-        }
-    });
+// Генератор паролей
+function generatePass() {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let res = "";
+    for (let i = 0; i < 14; i++) res += charset.charAt(Math.floor(Math.random() * charset.length));
+    return res;
 }
 
-async function handleSend()async function handleSend() {
+// --- ГЛАВНАЯ ЛОГИКА ОБРАБОТКИ ---
+async function handleSend() {
     const val = input.value.trim();
     if (!val) return;
 
     addMsg(val, 'user');
-    autoLearn(val);
     const low = val.toLowerCase();
     input.value = "";
 
     let response = "";
 
-    // --- НОВЫЙ БЛОК: МАТЕМАТИКА ---
-    // Проверяем, есть ли в строке цифры и знаки вычислений
-    if (/^[0-9+\-*/().\s]+$/.test(val) && /[0-9]/.test(val)) {
+    // 1. МАТЕМАТИКА
+    // Проверяем, состоит ли строка только из цифр и знаков + - * / ( ) .
+    const mathRegex = /^[0-9+\-*/().\s]+$/;
+    if (mathRegex.test(val) && /[0-9]/.test(val)) {
         try {
-            // Вычисляем результат (безопасно через Function)
+            // Используем Function вместо eval для безопасности
             const result = new Function('return ' + val)();
             response = "Результат вычислений: " + result;
-        } catch (e) {
-            response = "Математическая ошибка. Проверь правильность примера.";
+        } catch (e) { 
+            response = "Ошибка в примере. Проверь знаки!"; 
         }
-    } 
-    // --- КОНЕЦ БЛОКА МАТЕМАТИКИ ---
+    }
 
-    // Если это не математика, ищем в памяти
+    // 2. ГЕНЕРАТОР ПАРОЛЕЙ
+    if (!response && (low.includes("пароль") || low.includes("pass"))) {
+        response = "Сгенерировал надежный пароль: " + generatePass();
+    }
+
+    // 3. ПЕРЕВОДЧИК
+    if (!response && low.startsWith("переведи")) {
+        const textToTranslate = val.replace(/переведи/i, "").trim();
+        if (textToTranslate) {
+            window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(textToTranslate)}`, '_blank');
+            response = "Открываю переводчик для фразы: " + textToTranslate;
+        } else {
+            response = "Напиши 'переведи' и далее текст, который нужно перевести.";
+        }
+    }
+
+    // 4. КОМАНДА ОБУЧЕНИЯ (Запомни, что [вопрос] - [ответ])
+    if (!response && low.includes("запомни, что")) {
+        const clean = val.replace(/запомни, что/i, "").trim();
+        // Разделяем по тире или по слову "это"
+        const parts = clean.includes("—") ? clean.split("—") : clean.split("-");
+        
+        if (parts.length === 2) {
+            const key = parts[0].trim().toLowerCase();
+            const value = parts[1].trim();
+            aiMemory[key] = value;
+            saveKnowledge();
+            response = `Понял! Теперь я знаю, что "${key}" — это "${value}".`;
+        } else {
+            response = "Чтобы я запомнил, используй формат: Запомни, что [вопрос] — [ответ] (обязательно с тире).";
+        }
+    }
+
+    // 5. ПОИСК В БАЗЕ ЗНАНИЙ
     if (!response) {
         for (let key in aiMemory) {
             if (low.includes(key)) {
@@ -90,44 +110,29 @@ async function handleSend()async function handleSend() {
         }
     }
 
-    // Если всё еще нет ответа
+    // 6. СТАНДАРТНЫЕ КОМАНДЫ (Время, Дата)
     if (!response) {
-        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
-        else response = "Я записал это в свою базу данных. Если хочешь научить меня отвечать иначе, напиши: 'Запомни, что [вопрос] — [ответ]'";
-    }
-
-    await botType(response);
-}
-    // Запускаем процесс обучения на лету
-    autoLearn(val);
-    
-    const low = val.toLowerCase();
-    input.value = "";
-
-    let response = "";
-
-    // 1. Сначала ищем точное совпадение в памяти
-    for (let key in aiMemory) {
-        if (low.includes(key)) {
-            response = aiMemory[key];
-            break;
+        if (low.includes("время")) {
+            response = "Сейчас " + new Date().toLocaleTimeString();
+        } else if (low.includes("дата") || low.includes("число")) {
+            response = "Сегодня " + new Date().toLocaleDateString();
+        } else if (low.includes("очисти") || low.includes("удали чат")) {
+            chat.innerHTML = "";
+            response = "Чат очищен. Начнем с чистого листа!";
+        } else {
+            // Если ничего не подошло
+            response = "Я пока не знаю, что ответить. Но ты можешь научить меня! Напиши: Запомни, что [вопрос] — [ответ]";
         }
     }
 
-    // 2. Стандартные функции
-    if (!response) {
-        if (low.includes("время")) response = "Сейчас " + new Date().toLocaleTimeString();
-        else if (low.includes("дата")) response = "Сегодня " + new Date().toLocaleDateString();
-        else response = "Я записал это в свою базу данных и проанализирую позже.";
-    }
-
     await botType(response);
 }
 
+// Слушатели событий
 btn.onclick = handleSend;
 input.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
 
+// Стартовое приветствие
 window.onload = () => {
-    botType("Я активирован и готов учиться у тебя.");
+    botType("Система FLOTJI-AI готова. Попробуй математику (например 2+2), команду 'пароль' или обучи меня чему-то новому!");
 };
-
